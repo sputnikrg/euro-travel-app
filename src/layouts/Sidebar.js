@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; // Добавляем useEffect и useState
+import { useState } from 'react'; // Добавляем useState
 import { useAuth } from '../features/auth/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../supabaseClient';
