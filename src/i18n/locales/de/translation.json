@@ -8,7 +8,8 @@
   },
   "actions": {
     "add_trip": "Fahrt hinzufügen",
-    "book": "Buchen"
+    "book": "Buchen",
+    "confirm": "Bestätigen"
   },
   "common": {
     "loading": "Laden..."
@@ -16,10 +17,18 @@
   "units": {
     "km": "km"
   },
+  "search": {
+    "from": "Von",
+    "to": "Nach"
+  },
+  "seats": {
+    "available": "Frei"
+  },
   "booking": {
-    "enter_name": "Geben Sie Ihren Namen ein:",
-    "enter_phone": "Geben Sie Ihre Telefonnummer ein:",
-    "success": "Buchungsanfrage erfolgreich gesendet!",
-    "error": "Buchungsfehler"
+    "name": "Ihr Name",
+    "phone": "Telefonnummer",
+    "how_many_seats": "Wie viele Plätze?",
+    "success": "Anfrage gesendet!",
+    "error": "Bitte alle Felder korrekt ausfüllen"
   }
 }
