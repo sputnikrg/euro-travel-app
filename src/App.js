@@ -3,118 +3,113 @@ import { useTrips } from './features/trips/useTrips'
 import { Sidebar } from './layouts/Sidebar'
 import { MapView } from './features/map/MapView'
 import AddTripForm from './features/trips/AddTripForm'
-import { supabase } from './supabaseClient'
-import { useEffect } from 'react'
+import { useAuth } from './features/auth/AuthContext' 
 import Login from './features/auth/Login'
+import L from 'leaflet' // Импортируем для расчета дистанции
 
 function App() {
-  // ВАЖНО: вызываем useTrips ОДИН раз
+  const { user } = useAuth(); 
   const { trips, loading, fetchTrips } = useTrips()
 
   const [selectedTrip, setSelectedTrip] = useState(null)
-
   const [mode, setMode] = useState("IDLE")
-  const [from, setFrom] = useState(null)
-  const [to, setTo] = useState(null)
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession()
-      setUser(data.session?.user ?? null)
-    }
-
-    getSession()
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null)
-      }
-    )
-
-    return () => {
-      listener.subscription.unsubscribe()
-    }
-  }, [])
+  
+  // Теперь храним все точки в одном массиве
+  const [waypoints, setWaypoints] = useState([])
 
   if (!user) {
     return <Login />
   }
 
+  // Функция для расчета общего расстояния маршрута
+  const calculateDistance = (points) => {
+    if (points.length < 2) return 0;
+    let total = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = L.latLng(points[i].lat, points[i].lng);
+      const p2 = L.latLng(points[i+1].lat, points[i+1].lng);
+      total += p1.distanceTo(p2);
+    }
+    return (total / 1000).toFixed(1); // Дистанция в километрах
+  }
+
+  const distance = calculateDistance(waypoints);
+
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
-
       <Sidebar
         trips={trips}
         selectedTrip={selectedTrip}
         onSelect={setSelectedTrip}
         loading={loading}
+        fetchTrips={fetchTrips} 
         onAddTrip={() => {
           setSelectedTrip(null)
-          setMode("SELECTING_FROM")
+          setWaypoints([]) // Сбрасываем старые точки
+          setMode("ADDING_STOPS") // Новый режим для нескольких точек
         }}
       />
 
       {mode !== "IDLE" && (
-        <div style={{
-          position: 'absolute',
-          top: 20,
-          left: 420,
-          zIndex: 1000,
-          background: 'white',
-          padding: 15,
-          borderRadius: 10,
-          boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-        }}>
-          {mode === "SELECTING_FROM" && <div>Выберите точку отправления</div>}
-          {mode === "SELECTING_TO" && <div>Выберите точку прибытия</div>}
-          {mode === "READY" && <div>Заполните форму рейса</div>}
-
-          <button
-            onClick={() => {
-              setMode("IDLE")
-              setFrom(null)
-              setTo(null)
-            }}
-            style={{
-              marginTop: 10,
-              padding: '5px 10px',
-              borderRadius: 6,
-              border: '1px solid #ccc',
-              cursor: 'pointer'
-            }}
-          >
-            Отмена
-          </button>
+        <div style={styles.overlayInfo}>
+           <div>Точек выбрано: {waypoints.length}</div>
+           {waypoints.length >= 2 && (
+             <div style={{ fontWeight: 'bold', color: '#2ecc71' }}>
+               Расстояние: {distance} км
+             </div>
+           )}
+           <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+             Кликайте на карту, чтобы добавить остановку
+           </div>
+           
+           <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+             <button 
+               onClick={() => setMode("READY")}
+               disabled={waypoints.length < 2}
+               style={styles.saveBtn}
+             >
+               Готово
+             </button>
+             <button 
+               onClick={() => { setMode("IDLE"); setWaypoints([]); }}
+               style={styles.cancelBtn}
+             >
+               Отмена
+             </button>
+           </div>
         </div>
       )}
 
       <MapView
         selectedTrip={selectedTrip}
         mode={mode}
-        setMode={setMode}
-        from={from}
-        to={to}
-        setFrom={setFrom}
-        setTo={setTo}
+        waypoints={waypoints}
+        setWaypoints={setWaypoints}
       />
 
-      {/* ФОРМА ПОЯВЛЯЕТСЯ ТОЛЬКО КОГДА ВЫБРАНЫ 2 ТОЧКИ */}
       {mode === "READY" && (
         <AddTripForm
-          from={from}
-          to={to}
+          waypoints={waypoints} // Передаем весь массив
+          distance={distance}   // Передаем посчитанное расстояние
           onSaved={async () => {
             await fetchTrips()
             setMode("IDLE")
-            setFrom(null)
-            setTo(null)
+            setWaypoints([])
           }}
         />
       )}
-
     </div>
   )
+}
+
+const styles = {
+    overlayInfo: {
+        position: 'absolute', top: 20, left: 420, zIndex: 1000, 
+        background: 'white', padding: 15, borderRadius: 10, boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+        minWidth: '200px'
+    },
+    saveBtn: { background: '#3498db', color: 'white', border: 'none', padding: '5px 15px', borderRadius: '5px', cursor: 'pointer' },
+    cancelBtn: { background: '#eee', border: 'none', padding: '5px 15px', borderRadius: '5px', cursor: 'pointer' }
 }
 
 export default App

@@ -1,26 +1,34 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../../supabaseClient'
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../../supabaseClient';
 
-export function useTrips() {
-  const [trips, setTrips] = useState([])
-  const [loading, setLoading] = useState(true)
+export const useTrips = () => {
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchTrips()
-  }, [])
+  const fetchTrips = useCallback(async (userId = null) => {
+    setLoading(true);
+    
+    // Начинаем запрос
+    let query = supabase.from('trips').select('*');
 
-  const fetchTrips = async () => {
-    const { data, error } = await supabase
-      .from('trips')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (!error) {
-      setTrips(data)
+    // Если передан userId, фильтруем записи
+    if (userId) {
+      query = query.eq('user_id', userId);
     }
 
-    setLoading(false)
-  }
+    const { data, error } = await query.order('created_at', { ascending: false });
 
-  return { trips, loading, fetchTrips }
-}
+    if (error) {
+      console.error('Error fetching trips:', error);
+    } else {
+      setTrips(data);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchTrips();
+  }, [fetchTrips]);
+
+  return { trips, loading, fetchTrips };
+};

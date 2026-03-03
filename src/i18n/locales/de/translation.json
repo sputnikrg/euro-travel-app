@@ -1,9 +1,25 @@
 {
-  "title": "EuroWays DE",
-  "loading": "Lade Reisen...",
-  "addTrip": "Fahrt hinzufügen",
-  "from": "Von",
-  "to": "Nach",
-  "price": "Preis",
-  "date": "Datum"
+  "auth": {
+    "logout": "Abmelden"
+  },
+  "filters": {
+    "all_trips": "Alle Fahrten",
+    "my_trips": "Meine Fahrten"
+  },
+  "actions": {
+    "add_trip": "Fahrt hinzufügen",
+    "book": "Buchen"
+  },
+  "common": {
+    "loading": "Laden..."
+  },
+  "units": {
+    "km": "km"
+  },
+  "booking": {
+    "enter_name": "Geben Sie Ihren Namen ein:",
+    "enter_phone": "Geben Sie Ihre Telefonnummer ein:",
+    "success": "Buchungsanfrage erfolgreich gesendet!",
+    "error": "Buchungsfehler"
+  }
 }

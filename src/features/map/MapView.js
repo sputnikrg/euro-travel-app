@@ -1,30 +1,23 @@
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 
-function MapSelector({ mode, setMode, setFrom, setTo }) {
+function MapSelector({ mode, waypoints, setWaypoints }) {
   useMapEvents({
     click(e) {
-      if (mode === "SELECTING_FROM") {
-        setFrom(e.latlng)
-        setMode("SELECTING_TO")
-      } else if (mode === "SELECTING_TO") {
-        setTo(e.latlng)
-        setMode("READY")
+      if (mode === "ADDING_STOPS") {
+        // Добавляем новую координату в массив
+        setWaypoints([...waypoints, e.latlng])
       }
     }
   })
-
   return null
 }
 
 export function MapView({
   selectedTrip,
   mode,
-  setMode,
-  from,
-  to,
-  setFrom,
-  setTo
+  waypoints,
+  setWaypoints
 }) {
   return (
     <main style={{ flex: 1 }}>
@@ -37,45 +30,41 @@ export function MapView({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Режим добавления */}
-        {mode !== "IDLE" && (
+        {mode === "ADDING_STOPS" && (
           <MapSelector
             mode={mode}
-            setMode={setMode}
-            setFrom={setFrom}
-            setTo={setTo}
+            waypoints={waypoints}
+            setWaypoints={setWaypoints}
           />
         )}
 
-        {/* ВЫБРАННЫЕ ТОЧКИ ПРИ ДОБАВЛЕНИИ */}
-        {from && <Marker position={[from.lat, from.lng]} />}
-        {to && <Marker position={[to.lat, to.lng]} />}
+        {/* Отрисовка маркеров для создаваемого рейса */}
+        {waypoints.map((wp, idx) => (
+          <Marker key={idx} position={[wp.lat, wp.lng]} />
+        ))}
 
-        {from && to && (
+        {/* Отрисовка линии через все выбранные точки */}
+        {waypoints.length >= 2 && (
           <Polyline
-            positions={[
-              [from.lat, from.lng],
-              [to.lat, to.lng]
-            ]}
+            positions={waypoints.map(wp => [wp.lat, wp.lng])}
             color="red"
+            dashArray="5, 10" // Пунктирная линия для процесса создания
           />
         )}
 
-        {/* ПРОСМОТР СУЩЕСТВУЮЩЕГО РЕЙСА */}
-        {selectedTrip && mode === "IDLE" && (
+        {/* ПРОСМОТР СУЩЕСТВУЮЩЕГО РЕЙСА (если в базе уже есть массив) */}
+        {selectedTrip && mode === "IDLE" && selectedTrip.waypoints && (
           <>
-            <Marker position={[selectedTrip.start_lat, selectedTrip.start_lng]} />
-            <Marker position={[selectedTrip.end_lat, selectedTrip.end_lng]} />
+            {selectedTrip.waypoints.map((wp, idx) => (
+              <Marker key={idx} position={[wp.lat, wp.lng]} />
+            ))}
             <Polyline
-              positions={[
-                [selectedTrip.start_lat, selectedTrip.start_lng],
-                [selectedTrip.end_lat, selectedTrip.end_lng]
-              ]}
+              positions={selectedTrip.waypoints.map(wp => [wp.lat, wp.lng])}
               color="#3498db"
+              weight={4}
             />
           </>
         )}
-
       </MapContainer>
     </main>
   )

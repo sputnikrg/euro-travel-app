@@ -5,7 +5,10 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import './i18n'
+import './i18n';
+import './i18n/index';
+// 1. Импортируем провайдер авторизации
+import { AuthProvider } from './features/auth/AuthContext'; 
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -18,11 +21,11 @@ L.Icon.Default.mergeOptions({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    {/* 2. Оборачиваем App в AuthProvider */}
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
