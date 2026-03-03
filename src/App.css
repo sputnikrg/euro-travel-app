@@ -1,38 +1,84 @@
-.App {
-  text-align: center;
+/* Базовые стили для всех экранов */
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.app-main {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
-.App-link {
-  color: #61dafb;
+.map-wrapper {
+  flex: 1;
+  position: relative;
+  height: 100%; /* Обязательно для инициализации карты Leaflet */
+  min-height: 300px;
 }
 
+/* Стили для формы добавления рейса */
+.add-trip-form-container {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1001; /* Выше карты и информационных плашек */
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 768px) {
+  .app-main {
+    flex-direction: column !important;
+    overflow-y: auto; /* Позволяет прокручивать всю страницу целиком */
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto !important; /* На мобильных список может растягиваться */
+    min-height: 400px;
+    order: 2; /* Список рейсов под картой */
+    border-right: none !important;
+    border-top: 1px solid #ddd;
+  }
+
+  .map-wrapper {
+    height: 50vh !important; /* Карта занимает половину экрана */
+    width: 100% !important;
+    order: 1; /* Карта вверху */
+    flex: none;
+  }
+
+  .overlay-info {
+    left: 10px !important;
+    top: 10px !important;
+    min-width: calc(100% - 20px) !important;
+    box-sizing: border-box;
+  }
+
+  .add-trip-form-container {
+    position: fixed; /* На мобильных форма перекрывает всё для удобства ввода */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    z-index: 2000;
+    overflow-y: auto;
+    background: white;
+  }
+}
+
+/* Стандартные стили React (лого и хедер) */
+.App { text-align: center; }
+.App-logo { height: 40vmin; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo { animation: App-logo-spin infinite 20s linear; }
+}
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

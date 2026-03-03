@@ -12,3 +12,34 @@ code {
     monospace;
 }
 
+/* Базовые стили для мобильных устройств */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column !important; /* Стек вертикально вместо ряда */
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: 40vh !important; /* Сайдбар занимает только часть экрана */
+    order: 2; /* Карта будет сверху, список снизу */
+  }
+
+  .map-container {
+    height: 60vh !important;
+    order: 1;
+  }
+
+  .overlay-info {
+    left: 10px !important;
+    right: 10px !important;
+    top: 60px !important;
+    width: auto !important;
+  }
+
+  .add-trip-form {
+    width: calc(100% - 40px) !important;
+    right: 20px !important;
+    left: 20px !important;
+    top: 80px !important;
+  }
+}
